@@ -225,8 +225,6 @@ class SetupService
 
         UserAfterActivationSuccessfulEvent::dispatch( $user );
 
-        $this->createDefaultPayment( $user );
-
         return [
             'status' => 'success',
             'message' => __( 'NexoPOS has been successfully installed.' ),

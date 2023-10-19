@@ -246,13 +246,6 @@ class UserCrud extends CrudService
                             'label' => __( 'Roles' ),
                             'value' => $entry !== null ? ( $entry->roles()->get()->map( fn( $role ) => $role->id )->toArray() ?? '' ) : [],
                         ], [
-                            'type' => 'select',
-                            'label' => __( 'Group' ),
-                            'name' => 'group_id',
-                            'value' => $entry->group_id ?? '',
-                            'options' => Helper::toJsOptions( CustomerGroup::all(), [ 'id', 'name' ]),
-                            'description' => __( 'Assign the customer to a group' ),
-                        ], [
                             'type' => 'datetimepicker',
                             'label' => __( 'Birth Date' ),
                             'name' => 'birth_date',

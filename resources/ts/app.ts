@@ -21,7 +21,6 @@ const nsReset                       =   defineAsyncComponent( () => import( './p
 const nsModules                     =   defineAsyncComponent( () => import( './pages/dashboard/modules.vue' ) );
 const nsSettings                    =   defineAsyncComponent( () => import( './pages/dashboard/ns-settings.vue' ) );
 const nsPermissions                 =   defineAsyncComponent( () => import( './pages/dashboard/ns-permissions.vue' ) );
-const nsSaleReport                  =   defineAsyncComponent( () => import( './pages/dashboard/reports/ns-sale-report.vue' ) );
 
 declare const window;
 declare let nsExtraComponents;   
@@ -42,7 +41,6 @@ const allComponents    =   Object.assign({
     nsDashboard,
 
     nsNotifications,
-    nsSaleReport,
     ...baseComponents
 }, nsExtraComponents );
 

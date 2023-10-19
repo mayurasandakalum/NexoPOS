@@ -14,14 +14,10 @@ import nsPromptPopup from '~/popups/ns-prompt-popup.vue';
 import nsSelectPopup from '~/popups/ns-select-popup.vue';
 
 const popups    =   { 
-    nsOrderPreview,
-    nsProductPreview,
     nsAlertPopup,
     nsConfirmPopup,
     nsPromptPopup,
     nsMediaPopup,
-    nsProcurementQuantity,
-    nsOrdersRefund,
     nsSelectPopup,
     nsPOSLoadingPopup,
 };

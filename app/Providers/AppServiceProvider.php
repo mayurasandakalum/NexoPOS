@@ -189,44 +189,6 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function loadConfiguration()
     {
-        config([ 'nexopos.orders.statuses' => [
-            Order::PAYMENT_HOLD => __( 'Hold' ),
-            Order::PAYMENT_UNPAID => __( 'Unpaid' ),
-            Order::PAYMENT_PARTIALLY => __( 'Partially Paid' ),
-            Order::PAYMENT_PAID => __( 'Paid' ),
-            Order::PAYMENT_VOID => __( 'Voided' ),
-            Order::PAYMENT_REFUNDED => __( 'Refunded' ),
-            Order::PAYMENT_PARTIALLY_REFUNDED => __( 'Partially Refunded' ),
-            Order::PAYMENT_DUE => __( 'Due' ),
-            Order::PAYMENT_PARTIALLY_DUE => __( 'Partially Due' ),
-        ]]);
-
-        config([ 'nexopos.orders.types' => Hook::filter( 'ns-orders-types', [
-            'takeaway' => [
-                'identifier' => 'takeaway',
-                'label' => __( 'Take Away' ),
-                'icon' => '/images/groceries.png',
-                'selected' => false,
-            ],
-            'delivery' => [
-                'identifier' => 'delivery',
-                'label' => __( 'Delivery' ),
-                'icon' => '/images/delivery.png',
-                'selected' => false,
-            ],
-        ])]);
-
-        config([
-            'nexopos.orders.types-labels' => collect( config( 'nexopos.orders.types' ) )
-                ->mapWithKeys( fn( $type ) => [ $type[ 'identifier' ] => $type[ 'label' ] ])
-                ->toArray(),
-        ]);
-
-        config([
-            'nexopos.orders.products.refunds' => [
-                OrderProductRefund::CONDITION_DAMAGED => __( 'Damaged' ),
-                OrderProductRefund::CONDITION_UNSPOILED => __( 'Good Condition' ),
-            ],
-        ]);
+        // ...
     }
 }

@@ -120,7 +120,6 @@ class ResetService
         }
 
         Artisan::call( 'key:generate', [ '--force' => true ] );
-        Artisan::call( 'ns:cookie generate' );
 
         exec( 'rm -rf public/storage' );
 
