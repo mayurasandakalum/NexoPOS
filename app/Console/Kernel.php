@@ -57,45 +57,6 @@ class Kernel extends ConsoleKernel
         $schedule->call( fn() => ns()->checkSymbolicLinks() )->everyMinute();
 
         /**
-         * Will execute transactions job daily.
-         */
-        $schedule->job( new ExecuteReccuringTransactionsJob )->daily( '00:01' );
-
-        /**
-         * Will execute scheduled transactions
-         * every minutes
-         */
-        $schedule->job( DetectScheduledTransactionsJob::class )->everyMinute();
-
-        /**
-         * Will check procurement awaiting automatic
-         * stocking to update their status.
-         */
-        $schedule->job( new StockProcurementJob )->daily( '00:05' );
-
-        /**
-         * Will purge stoarge orders daily.
-         */
-        $schedule->job( new PurgeOrderStorageJob )->daily( '15:00' );
-
-        /**
-         * Will clear hold orders that has expired.
-         */
-        $schedule->job( new ClearHoldOrdersJob )->dailyAt( '14:00' );
-
-        /**
-         * Will detect products that has reached the threashold of
-         * low inventory to trigger a notification and an event.
-         */
-        $schedule->job( new DetectLowStockProductsJob )->dailyAt( '00:02' );
-
-        /**
-         * Will track orders saved with instalment and
-         * trigger relevant notifications.
-         */
-        $schedule->job( new TrackLaidAwayOrdersJob )->dailyAt( '13:00' );
-
-        /**
          * We'll clear temporary files weekly. This will erase folder that
          * hasn't been deleted after a module installation.
          */

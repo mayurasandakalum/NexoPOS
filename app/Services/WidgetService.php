@@ -56,14 +56,8 @@ class WidgetService
     public function __construct( private UsersService $usersService )
     {
         $this->widgets = [
-            IncompleteSaleCardWidget::class,
-            ExpenseCardWidget::class,
-            SaleCardWidget::class,
-            BestCustomersWidget::class,
+            IncompleteSaleCardWidget::class,            
             ProfileWidget::class,
-            OrdersChartWidget::class,
-            OrdersSummaryWidget::class,
-            BestCashiersWidget::class,
         ];
     }
 

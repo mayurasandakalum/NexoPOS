@@ -17,26 +17,13 @@ Route::middleware([
         'auth:sanctum',
     ])->group( function() {
         include dirname( __FILE__ ) . '/api/dashboard.php';
-        include dirname( __FILE__ ) . '/api/categories.php';
-        include dirname( __FILE__ ) . '/api/customers.php';
-        include dirname( __FILE__ ) . '/api/transactions.php';
-        include dirname( __FILE__ ) . '/api/modules.php';
-        include dirname( __FILE__ ) . '/api/medias.php';
-        include dirname( __FILE__ ) . '/api/notifications.php';
-        include dirname( __FILE__ ) . '/api/orders.php';
-        include dirname( __FILE__ ) . '/api/procurements.php';
-        include dirname( __FILE__ ) . '/api/products.php';
-        include dirname( __FILE__ ) . '/api/providers.php';
-        include dirname( __FILE__ ) . '/api/registers.php';
-        include dirname( __FILE__ ) . '/api/reset.php';
-        include dirname( __FILE__ ) . '/api/reports.php';
-        include dirname( __FILE__ ) . '/api/settings.php';
-        include dirname( __FILE__ ) . '/api/rewards.php';
-        include dirname( __FILE__ ) . '/api/taxes.php';
-        include dirname( __FILE__ ) . '/api/crud.php';
         include dirname( __FILE__ ) . '/api/forms.php';
-        include dirname( __FILE__ ) . '/api/units.php';
         include dirname( __FILE__ ) . '/api/users.php';
+        include dirname( __FILE__ ) . '/api/notifications.php';
+        include dirname( __FILE__ ) . '/api/medias.php';
+        include dirname( __FILE__ ) . '/api/modules.php';
+        include dirname( __FILE__ ) . '/api/settings.php';
+        include dirname( __FILE__ ) . '/api/reset.php';
     });
 });
 

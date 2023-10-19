@@ -65,15 +65,6 @@ class AppServiceProvider extends ServiceProvider
             return new UpdateService;
         });
 
-        $this->app->bind( DemoService::class, function() {
-            return new DemoService(
-                app()->make( ProductCategoryService::class ),
-                app()->make( ProductService::class ),
-                app()->make( ProcurementService::class ),
-                app()->make( OrdersService::class )
-            );
-        });
-
         // save Singleton for options
         $this->app->singleton( DateService::class, function() {
             $options = app()->make( Options::class );
@@ -89,10 +80,6 @@ class AppServiceProvider extends ServiceProvider
         // save Singleton for options
         $this->app->singleton( UserOptions::class, function() {
             return new UserOptions( Auth::id() );
-        });
-
-        $this->app->singleton( CashRegistersService::class, function() {
-            return new CashRegistersService;
         });
 
         // save Singleton for options
@@ -111,18 +98,8 @@ class AppServiceProvider extends ServiceProvider
             return new CrudService;
         });
 
-        $this->app->singleton( BarcodeService::class, function() {
-            return new BarcodeService;
-        });
-
         $this->app->singleton( ResetService::class, function() {
             return new ResetService;
-        });
-
-        $this->app->bind( ReportService::class, function() {
-            return new ReportService(
-                app()->make( DateService::class )
-            );
         });
 
         $this->app->singleton( CoreService::class, function() {
@@ -130,22 +107,10 @@ class AppServiceProvider extends ServiceProvider
                 app()->make( CurrencyService::class ),
                 app()->make( UpdateService::class ),
                 app()->make( DateService::class ),
-                app()->make( OrdersService::class ),
                 app()->make( NotificationService::class ),
-                app()->make( ProcurementService::class ),
                 app()->make( Options::class ),
                 app()->make( MathService::class ),
                 app()->make( EnvEditor::class ),
-            );
-        });
-
-        $this->app->bind( ProductCategoryService::class, function( $app ) {
-            return new ProductCategoryService;
-        });
-
-        $this->app->bind( TaxService::class, function( $app ) {
-            return new TaxService(
-                $app->make( CurrencyService::class )
             );
         });
 
@@ -165,65 +130,10 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->bind( ProductService::class, function( $app ) {
-            return new ProductService(
-                $app->make( ProductCategoryService::class ),
-                $app->make( TaxService::class ),
-                $app->make( CurrencyService::class ),
-                $app->make( UnitService::class ),
-                $app->make( BarcodeService::class ),
-            );
-        });
-
         $this->app->singleton( Validation::class, function( $app ) {
             return new Validation;
         });
-
-        $this->app->bind( UnitService::class, function( $app ) {
-            return new UnitService(
-                $app->make( CurrencyService::class )
-            );
-        });
-
-        $this->app->singleton( ProviderService::class, function( $app ) {
-            return new ProviderService;
-        });
-
-        $this->app->singleton( CustomerService::class, function( $app ) {
-            return new CustomerService;
-        });
-
-        $this->app->bind( TransactionService::class, function( $app ) {
-            return new TransactionService(
-                app()->make( DateService::class )
-            );
-        });
-
-        $this->app->bind( OrdersService::class, function( $app ) {
-            return new OrdersService(
-                customerService: $app->make( CustomerService::class ),
-                productService: $app->make( ProductService::class ),
-                unitService: $app->make( UnitService::class ),
-                dateService: $app->make( DateService::class ),
-                currencyService: $app->make( CurrencyService::class ),
-                optionsService: $app->make( Options::class ),
-                taxService: $app->make( TaxService::class ),
-                reportService: $app->make( ReportService::class ),
-                mathService: $app->make( MathService::class ),
-            );
-        });
-
-        $this->app->bind( ProcurementService::class, function( $app ) {
-            return new ProcurementService(
-                $app->make( ProviderService::class ),
-                $app->make( UnitService::class ),
-                $app->make( ProductService::class ),
-                $app->make( CurrencyService::class ),
-                $app->make( DateService::class ),
-                $app->make( BarcodeService::class ),
-            );
-        });
-
+        
         $this->app->singleton( WidgetService::class, function( $app ) {
             return new WidgetService(
                 $app->make( UsersService::class )
