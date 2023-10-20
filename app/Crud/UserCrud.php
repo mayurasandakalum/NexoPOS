@@ -8,11 +8,10 @@ use App\Casts\NotDefinedCast;
 use App\Casts\YesNoBoolCast;
 use App\Events\UserAfterActivationSuccessfulEvent;
 use App\Exceptions\NotAllowedException;
-use App\Models\CustomerBillingAddress;
-use App\Models\CustomerGroup;
-use App\Models\CustomerShippingAddress;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\UserBillingAddress;
+use App\Models\UserShippingAddress;
 use App\Services\CrudEntry;
 use App\Services\CrudService;
 use App\Services\Helper;
@@ -61,7 +60,6 @@ class UserCrud extends CrudService
      */
     public $relations = [
         'leftJoin' => [
-            [ 'nexopos_customers_groups as group', 'nexopos_users.group_id', '=', 'group.id' ],
             [ 'nexopos_users as author', 'nexopos_users.author', '=', 'author.id' ],
         ],
     ];
@@ -69,7 +67,6 @@ class UserCrud extends CrudService
     public $pick = [
         'author' => [ 'username' ],
         'role' => [ 'name' ],
-        'group' => [ 'id', 'name' ],
     ];
 
     protected $permissions = [
@@ -111,8 +108,8 @@ class UserCrud extends CrudService
     ];
 
     protected $tabsRelations = [
-        'shipping' => [ CustomerShippingAddress::class, 'customer_id', 'id' ],
-        'billing' => [ CustomerBillingAddress::class, 'customer_id', 'id' ],
+        'shipping' => [ UserShippingAddress::class, 'user_id', 'id' ],
+        'billing' => [ UserBillingAddress::class, 'user_id', 'id' ],
     ];
 
     protected $casts = [
@@ -445,15 +442,6 @@ class UserCrud extends CrudService
         }
 
         return collect( $inputs )->map( function( $value, $key ) {
-            if ( $key === 'group_id' && empty( $value ) ) {
-                $value = $this->options->get( 'ns_customers_default_group', false );
-                $group = CustomerGroup::find( $value );
-
-                if ( ! $group instanceof CustomerGroup ) {
-                    throw new NotAllowedException( __( 'The assigned default customer group doesn\'t exist or is not defined.' ) );
-                }
-            }
-
             return $value;
         })->toArray();
     }
@@ -479,15 +467,6 @@ class UserCrud extends CrudService
         }
 
         return collect( $inputs )->map( function( $value, $key ) {
-            if ( $key === 'group_id' && empty( $value ) ) {
-                $value = $this->options->get( 'ns_customers_default_group', false );
-                $group = CustomerGroup::find( $value );
-
-                if ( ! $group instanceof CustomerGroup ) {
-                    throw new NotAllowedException( __( 'The assigned default customer group doesn\'t exist or is not defined.' ) );
-                }
-            }
-
             return $value;
         })->toArray();
     }
@@ -611,11 +590,6 @@ class UserCrud extends CrudService
                 '$direction' => '',
                 '$sort' => true,
             ],
-            'group_name' => [
-                'label' => __( 'Group Name' ),
-                '$direction' => '',
-                '$sort' => true,
-            ],
             'account_amount' => [
                 'label' => __( 'Wallet Balance' ),
                 '$direction' => '',
@@ -662,26 +636,8 @@ class UserCrud extends CrudService
 
         $entry->action(
             identifier: 'customers_orders',
-            label: __( 'Orders' ),
-            url: ns()->url( 'dashboard/users/' . $entry->id . '/orders' ),
-        );
-
-        $entry->action(
-            identifier: 'customers_rewards',
-            label: __( 'Rewards' ),
-            url: ns()->url( 'dashboard/users/' . $entry->id . '/rewards' ),
-        );
-
-        $entry->action(
-            identifier: 'customers_coupons',
-            label: __( 'Coupons' ),
-            url: ns()->url( 'dashboard/users/' . $entry->id . '/coupons' ),
-        );
-
-        $entry->action(
-            identifier: 'customers_history',
-            label: __( 'Wallet History' ),
-            url: ns()->url( 'dashboard/users/' . $entry->id . '/account-history' ),
+            label: __( 'Instances' ),
+            url: ns()->url( 'dashboard/users/' . $entry->id . '/instances' ),
         );
 
         $entry->action(

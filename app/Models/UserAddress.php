@@ -11,11 +11,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $uuid
  * @property \Carbon\Carbon $updated_at
  */
-class CustomerAddress extends NsModel
+class UserAddress extends NsModel
 {
     use HasFactory;
 
-    protected $table = 'nexopos_' . 'customers_addresses';
+    protected $table = 'nexopos_' . 'users_addresses';
 
     /**
      * define the relationship

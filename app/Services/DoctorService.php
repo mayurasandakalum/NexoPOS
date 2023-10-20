@@ -17,6 +17,9 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+/**
+ * @deprecated
+ */
 class DoctorService
 {
     public function __construct( protected Command $command)
