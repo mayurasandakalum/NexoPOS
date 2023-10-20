@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Crud\RolesCrud;
 use App\Crud\UserCrud;
+use App\Services\ModulesService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
@@ -38,7 +39,7 @@ class CrudServiceProvider extends ServiceProvider
              * defined they want to be autoloaded. We expect classes to have 2
              * constant: AUTOLOAD=true, IDENTIFIER=<string>.
              */
-            $classes = Cache::get( 'crud-classes', function( ) {
+            $classes = Cache::get( 'crud-classes', function() {
                 $files = collect( Storage::disk( 'ns' )->files( 'app/Crud' ) );
 
                 return $files->map( fn( $file ) => 'App\Crud\\' . pathinfo( $file )[ 'filename' ] )
@@ -53,6 +54,40 @@ class CrudServiceProvider extends ServiceProvider
 
             if ( $class->count() === 1 ) {
                 return $class->first();
+            }
+            
+            /**
+             * We'll attempt to perform the same autoload
+             * but for only enabled modules
+             * @var ModulesService $modulesService 
+             */
+            $modulesService    =   app()->make( ModulesService::class );
+
+            $classes            =   collect( $modulesService->getEnabled() )->map( function( $module ) use ( $namespace ) {
+                $classes = Cache::get( 'modules-crud-classes-' . $module[ 'namespace' ], function() use ( $module ) {
+                    $files = collect( Storage::disk( 'ns' )->files( 'modules' . DIRECTORY_SEPARATOR . $module[ 'namespace' ] . DIRECTORY_SEPARATOR . 'Crud' ) );
+    
+                    return $files->map( fn( $file ) => 'Modules\\' . $module[ 'namespace' ] . '\Crud\\' . pathinfo( $file )[ 'filename' ] )
+                        ->filter( fn( $class ) => ( defined( $class . '::AUTOLOAD' ) && defined( $class . '::IDENTIFIER' ) ) );
+                });
+
+                /**
+                 * We pull the cached classes and checks if the
+                 * class has autoload and identifier defined.
+                 */
+                $class = collect( $classes )->filter( fn( $class ) => $class::AUTOLOAD && $class::IDENTIFIER === $namespace );
+
+                if ( $class->count() === 1 ) {
+                    return $class->first();
+                }
+            });
+
+            /**
+             * If the namespace match a module crud instance, 
+             * we'll use that first result
+             */
+            if ( $classes->isNotEmpty() ) {
+                return $classes->flatten()->first();
             }
 
             /**
