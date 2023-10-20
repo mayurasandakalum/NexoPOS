@@ -24,3 +24,11 @@ $admin->addPermissions([
     'manage.modules',
     'read.dashboard',
 ]);
+
+Permission::where( 'namespace', 'like', '%.self' )->get()->each( function( $permission ) use ( $admin ) {
+    $admin->addPermissions( $permission );
+});
+
+Permission::where( 'namespace', 'like', '%.all' )->get()->each( function( $permission ) use ( $admin ) {
+    $admin->addPermissions( $permission );
+});

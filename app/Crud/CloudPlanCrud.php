@@ -1,25 +1,20 @@
-@inject( 'Schema', 'Illuminate\Support\Facades\Schema' )
-@inject( 'Str', 'Illuminate\Support\Str' )
 <?php
-$model          =   explode( '\\', $model_name );
-$lastClassName  =   $model[ count( $model ) - 1 ];
-?>
-<{{ '?php' }}
-@if( isset( $module ) )
-namespace Modules\{{ $module[ 'namespace' ] }}\Crud;
-@else
 namespace App\Crud;
-@endif
 
+use App\Casts\CurrencyCast;
+use App\Casts\DateCast;
+use App\Casts\DayCast;
+use App\Casts\YesNoBoolCast;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Services\CrudService;
 use App\Services\CrudEntry;
 use App\Exceptions\NotAllowedException;
 use TorMorten\Eventy\Facades\Events as Hook;
-use {{ trim( $model_name ) }};
+use App\Models\CloudPlan;
+use App\Services\Helper;
 
-class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
+class CloudPlanCrud extends CrudService
 {
     /**
      * Defines if the crud class should be automatically discovered by NexoPOS.
@@ -27,35 +22,43 @@ class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
      */
     const AUTOLOAD = true;
 
+    protected $casts    =   [
+        'trial_duration'    =>  DayCast::class,
+        'has_trial'         =>  YesNoBoolCast::class,
+        'cost'              =>  CurrencyCast::class,
+        'updated_at'        =>  DateCast::class,
+        'created_at'        =>  DateCast::class,
+    ];
+
     /**
      * define the base table
      * @param string
      */
-    protected $table = '{{ strtolower( trim( $table_name ) ) }}';
+    protected $table = 'cloud_plans';
 
     /**
      * default slug
      * @param string
      */
-    protected $slug = '{{ strtolower( trim( $route_name ) ) }}';
+    protected $slug = 'cloud-plans';
 
     /**
      * Define namespace
      * @param string
      */
-    protected $namespace = '{{ strtolower( trim( $namespace ) ) }}';
+    protected $namespace = 'cloud-plans';
 
     /**
      * To be able to autoload the class, we need to define
      * the identifier on a constant.
      */
-    const IDENTIFIER = '{{ strtolower( trim( $namespace ) ) }}';
+    const IDENTIFIER = 'cloud-plans';
 
     /**
      * Model Used
      * @param string
      */
-    protected $model = {{ trim( $lastClassName ) }}::class;
+    protected $model = CloudPlan::class;
 
     /**
      * Define permissions
@@ -74,8 +77,6 @@ class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
      * @param array
      */
     public $relations   =  [
-        @if( isset( $relations ) && count( $relations ) > 0 ) @foreach( $relations as $relation )[ '{{ strtolower( trim( $relation[0] ) ) }}', '{{ strtolower( trim( $relation[2] ) ) }}', '=', '{{ strtolower( trim( $relation[1] ) ) }}' ],
-        @endforeach @endif
     ];
 
     /**
@@ -119,7 +120,7 @@ class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
      * If few fields should only be filled
      * those should be listed here.
      */
-    public $fillable = {!! json_encode( $fillable ?: [] ) !!};
+    public $fillable = [];
 
     /**
      * If fields should be ignored during saving
@@ -156,22 +157,22 @@ class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
     public function getLabels(): array
     {
         return [
-            'list_title'            =>  __( '{{ ucwords( $Str::plural( trim( $resource_name ) ) ) }} List' ),
-            'list_description'      =>  __( 'Display all {{ strtolower( $Str::plural( trim( $resource_name ) ) ) }}.' ),
-            'no_entry'              =>  __( 'No {{ strtolower( $Str::plural( trim( $resource_name ) ) ) }} has been registered' ),
-            'create_new'            =>  __( 'Add a new {{ strtolower( $Str::singular( trim( $resource_name ) ) ) }}' ),
-            'create_title'          =>  __( 'Create a new {{ strtolower( $Str::singular( trim( $resource_name ) ) ) }}' ),
-            'create_description'    =>  __( 'Register a new {{ strtolower( $Str::singular( trim( $resource_name ) ) ) }} and save it.' ),
-            'edit_title'            =>  __( 'Edit {{ strtolower( $Str::singular( trim( $resource_name ) ) ) }}' ),
-            'edit_description'      =>  __( 'Modify  {{ ucwords( strtolower( $Str::singular( trim( $resource_name ) ) ) ) }}.' ),
-            'back_to_list'          =>  __( 'Return to {{ ucwords( $Str::plural( trim( $resource_name ) ) ) }}' ),
+            'list_title'            =>  __( 'Cloud Plans' ),
+            'list_description'      =>  __( 'Shows all available cloud plans.' ),
+            'no_entry'              =>  __( 'No cloud plans has been saved yet!' ),
+            'create_new'            =>  __( 'Add a new Cloud Plan' ),
+            'create_title'          =>  __( 'Create a new Cloud Plan' ),
+            'create_description'    =>  __( 'Configure a new Cloud Plan and seve it.' ),
+            'edit_title'            =>  __( 'Edit Cloud Plan' ),
+            'edit_description'      =>  __( 'Modify  Cloud Plan.' ),
+            'back_to_list'          =>  __( 'Return to Cloud Plans' ),
         ];
     }
 
     /**
      * Defines the forms used to create and update entries.
      */
-    public function getForm( {{ trim( $lastClassName ) }} $entry = null ): array
+    public function getForm( CloudPlan $entry = null ): array
     {
         return [
             'main' =>  [
@@ -184,12 +185,35 @@ class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
                 'general'   =>  [
                     'label'     =>  __( 'General' ),
                     'fields'    =>  [
-                        @foreach( $Schema::getColumnListing( $table_name ) as $column )[
-                            'type'  =>  'text',
-                            'name'  =>  '{{ $column }}',
-                            'label' =>  __( '{{ ucwords( $column ) }}' ),
-                            'value' =>  $entry->{{ $column }} ?? '',
-                        ], @endforeach
+                        [
+                            'type'  =>  'switch',
+                            'name'  =>  'has_trial',
+                            'options'   =>  Helper::kvToJsOptions([
+                                0   =>  __( 'No' ),
+                                1   =>  __( 'Yes' ),
+                            ]),
+                            'label' =>  __( 'Has Trial' ),
+                            'description'   =>  __( 'Set if the plan has a trial' ),
+                            'value' =>  $entry->has_trial ?? '',
+                        ], [
+                            'type'  =>  'number',
+                            'name'  =>  'trial_duration',
+                            'label' =>  __( 'Trial Duration' ),
+                            'description'   =>  __( 'Set (in days) how long a trial last.' ),
+                            'value' =>  $entry->trial_duration ?? '',
+                        ], [
+                            'type'  =>  'number',
+                            'name'  =>  'cost',
+                            'label' =>  __( 'Cost' ),
+                            'description'   =>  __( 'Set the cost of the plan' ),
+                            'value' =>  $entry->cost ?? '',
+                        ], [
+                            'type'  =>  'textarea',
+                            'name'  =>  'description',
+                            'label' =>  __( 'Description' ),
+                            'description'   =>  __( 'Provide futher context for a better understanding.' ),
+                            'value' =>  $entry->description ?? '',
+                        ], 
                     ]
                 ]
             ]
@@ -203,6 +227,8 @@ class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
      */
     public function filterPostInputs( $inputs ): array
     {
+        $inputs[ 'author' ] =   Auth::id();
+
         return $inputs;
     }
 
@@ -211,8 +237,10 @@ class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
      * @param array of fields
      * @return array of fields
      */
-    public function filterPutInputs( array $inputs, {{ trim( $lastClassName ) }} $entry )
+    public function filterPutInputs( array $inputs, CloudPlan $entry )
     {
+        $inputs[ 'author' ] =   Auth::id();
+        
         return $inputs;
     }
 
@@ -231,7 +259,7 @@ class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
      * Trigger actions that will be executed 
      * after the entry has been created.
      */
-    public function afterPost( array $request, {{ trim( $lastClassName ) }} $entry ): array
+    public function afterPost( array $request, CloudPlan $entry ): array
     {
         return $request;
     }
@@ -252,7 +280,7 @@ class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
      * Trigger actions that are executed before
      * the crud entry is updated.
      */
-    public function beforePut( array $request, {{ trim( $lastClassName ) }} $entry ): array
+    public function beforePut( array $request, CloudPlan $entry ): array
     {
         $this->allowedTo( 'update' );
 
@@ -263,7 +291,7 @@ class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
      * This trigger actions that are executed after
      * the crud entry is successfully updated.
      */
-    public function afterPut( array $request, {{ trim( $lastClassName ) }} $entry ): array
+    public function afterPut( array $request, CloudPlan $entry ): array
     {
         return $request;
     }
@@ -274,7 +302,7 @@ class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
      */
     public function beforeDelete( $namespace, $id, $model ): void
     {
-        if ( $namespace == '{{ strtolower( trim( $namespace ) ) }}' ) {
+        if ( $namespace == 'cloud-plans' ) {
             /**
              *  Perform an action before deleting an entry
              *  In case something wrong, this response can be returned
@@ -298,13 +326,31 @@ class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
     public function getColumns(): array
     {
         return [
-            @foreach( $Schema::getColumnListing( $table_name ) as $column )
-'{{ $column }}'  =>  [
-                'label'  =>  __( '{{ ucwords( $column ) }}' ),
+            'name'  =>  [
+                'label'  =>  __( 'Name' ),
                 '$direction'    =>  '',
                 '$sort'         =>  false
             ],
-            @endforeach
+            'cost'  =>  [
+                'label'  =>  __( 'Cost' ),
+                '$direction'    =>  '',
+                '$sort'         =>  false
+            ],
+            'has_trial'  =>  [
+                'label'  =>  __( 'Has Trial' ),
+                '$direction'    =>  '',
+                '$sort'         =>  false
+            ],
+            'trial_duration'  =>  [
+                'label'  =>  __( 'Trial Duration' ),
+                '$direction'    =>  '',
+                '$sort'         =>  false
+            ],
+            'updated_at'  =>  [
+                'label'  =>  __( 'Updated At' ),
+                '$direction'    =>  '',
+                '$sort'         =>  false
+            ],
         ];
     }
 
@@ -326,7 +372,7 @@ class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
             identifier: 'delete',
             label: __( 'Delete' ),
             type: 'DELETE',
-            url: ns()->url( '/api/crud/{{ strtolower( trim( $namespace ) ) }}/' . $entry->id ),
+            url: ns()->url( '/api/crud/cloud-plans/' . $entry->id ),
             confirm: [
                 'message'  =>  __( 'Would you like to delete this ?' ),
             ]
@@ -365,7 +411,7 @@ class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
 
             foreach ( $request->input( 'entries' ) as $id ) {
                 $entity     =   $this->model::find( $id );
-                if ( $entity instanceof {{ trim( $lastClassName ) }} ) {
+                if ( $entity instanceof CloudPlan ) {
                     $entity->delete();
                     $status[ 'success' ]++;
                 } else {
@@ -384,11 +430,11 @@ class {{ ucwords( $Str::camel( $resource_name ) ) }}Crud extends CrudService
     public function getLinks(): array
     {
         return  [
-            'list'      =>  ns()->url( 'dashboard/' . '{{ strtolower( trim( $route_name ) ) }}' ),
-            'create'    =>  ns()->url( 'dashboard/' . '{{ strtolower( trim( $route_name ) ) }}/create' ),
-            'edit'      =>  ns()->url( 'dashboard/' . '{{ strtolower( trim( $route_name ) ) }}/edit/' ),
-            'post'      =>  ns()->url( 'api/crud/' . '{{ strtolower( trim( $namespace ) ) }}' ),
-            'put'       =>  ns()->url( 'api/crud/' . '{{ strtolower( trim( $namespace ) ) }}/{id}' . '' ),
+            'list'      =>  ns()->url( 'dashboard/' . 'cloud-plans' ),
+            'create'    =>  ns()->url( 'dashboard/' . 'cloud-plans/create' ),
+            'edit'      =>  ns()->url( 'dashboard/' . 'cloud-plans/edit/' ),
+            'post'      =>  ns()->url( 'api/crud/' . 'cloud-plans' ),
+            'put'       =>  ns()->url( 'api/crud/' . 'cloud-plans/{id}' . '' ),
         ];
     }
 
