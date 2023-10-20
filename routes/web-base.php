@@ -54,7 +54,6 @@ Route::middleware([
 
             include dirname( __FILE__ ) . '/web/modules.php';
             include dirname( __FILE__ ) . '/web/users.php';
-            include dirname( __FILE__ ) . '/web/cloud.php';
 
             Route::get( '/crud/download/{hash}', [ CrudController::class, 'downloadSavedFile' ])->name( 'ns.dashboard.crud-download' );
         });

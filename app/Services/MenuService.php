@@ -23,51 +23,6 @@ class MenuService
                     ],
                 ],
             ],
-            'cloud-plans' => [
-                'label' => __( 'Cloud Plans' ),
-                'icon' => 'la-list-alt',
-                'permissions' => [ 'manage.cloud-plans.all' ],
-                'childrens' => [
-                    'list' => [
-                        'label' => __( 'List' ),
-                        'href' => ns()->url( '/dashboard/cloud-plans' ),
-                    ],
-                    'create' => [
-                        'label' => __( 'Create'),
-                        'href' => ns()->url( '/dashboard/cloud-plans/create' ),
-                    ],
-                ],
-            ],
-            'cloud-instances' => [
-                'label' => __( 'Cloud Instances' ),
-                'icon' => 'la-cloud',
-                'permissions' => [ 'manage.cloud-instances.all' ],
-                'childrens' => [
-                    'list' => [
-                        'label' => __( 'List' ),
-                        'href' => ns()->url( '/dashboard/cloud-instances' ),
-                    ],
-                    'create' => [
-                        'label' => __( 'Deploy'),
-                        'href' => ns()->url( '/dashboard/cloud-instances/create' ),
-                    ],
-                ],
-            ],
-            'my-cloud-instances' => [
-                'label' => __( 'My Instances' ),
-                'icon' => 'la-cloud-meatball',
-                'permissions' => [ 'manage.cloud-instances.self' ],
-                'childrens' => [
-                    'list' => [
-                        'label' => __( 'List' ),
-                        'href' => ns()->url( '/dashboard/my-cloud-instances' ),
-                    ],
-                    'create' => [
-                        'label' => __( 'New Instance' ),
-                        'href' => ns()->url( '/dashboard/my-cloud-instances/create' ),
-                    ],
-                ],
-            ],
             'modules' => [
                 'label' => __( 'Modules' ),
                 'icon' => 'la-plug',

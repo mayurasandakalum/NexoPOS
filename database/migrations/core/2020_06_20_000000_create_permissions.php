@@ -92,9 +92,6 @@ return new class extends Migration
 
         include_once dirname( __FILE__ ) . '/../../permissions/medias.php';
         include_once dirname( __FILE__ ) . '/../../permissions/widgets.php';
-        include_once dirname( __FILE__ ) . '/../../permissions/cloud-plans.php';
-        include_once dirname( __FILE__ ) . '/../../permissions/cloud-instances.php';
-        include_once dirname( __FILE__ ) . '/../../permissions/cloud-subscriptions.php';
     }
 
     /**

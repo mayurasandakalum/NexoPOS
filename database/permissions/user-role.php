@@ -17,7 +17,3 @@ $user->addPermissions([
 $user->addPermissions( Permission::whereIn( 'namespace', [
     ( new ProfileWidget )->getPermission(),
 ])->get()->map( fn( $permission ) => $permission->namespace ) );
-
-Permission::where( 'namespace', 'like', '%.self' )->get()->each( function( $permission ) use ( $user ) {
-    $user->addPermissions( $permission );
-});
